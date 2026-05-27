@@ -1,0 +1,17 @@
+.empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.message {
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+}
