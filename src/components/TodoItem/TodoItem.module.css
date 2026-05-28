@@ -265,6 +265,157 @@
   }
 }
 
+/* ---- container ---- */
+.container {
+  width: 100%;
+}
+
+/* ---- expand button ---- */
+.expandBtn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.35rem;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: transform 0.15s ease;
+}
+
+.expandBtn:hover {
+  background: var(--color-divider);
+  color: var(--color-text);
+}
+
+/* ---- subtask section ---- */
+.subtaskSection {
+  padding: 0.25rem 0 0.5rem 2.8rem;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.subtaskItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+}
+
+.subtaskCheckWrap {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid var(--color-text-tertiary);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.subtaskCheckWrap:hover {
+  border-color: var(--color-primary);
+}
+
+.subtaskChecked {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+
+.subtaskCheckIcon {
+  color: #fff;
+  font-size: 0.6rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.subtaskText {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+.subtaskTextDone {
+  text-decoration: line-through;
+  color: var(--color-text-tertiary);
+}
+
+.subtaskEditInput {
+  flex: 1;
+  padding: 0.2rem 0.4rem;
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius);
+  outline: none;
+  font-size: 0.85rem;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.subtaskDeleteBtn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.subtaskItem:hover .subtaskDeleteBtn {
+  opacity: 1;
+}
+
+.subtaskDeleteBtn:hover {
+  color: var(--color-danger);
+}
+
+.addSubtaskRow {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  padding-top: 0.3rem;
+}
+
+.addSubtaskInput {
+  flex: 1;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  outline: none;
+  font-size: 0.8rem;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.addSubtaskInput:focus {
+  border-color: var(--color-primary);
+}
+
+.addSubtaskBtn {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius);
+  border: none;
+  color: #fff;
+  background: var(--color-primary);
+  cursor: pointer;
+}
+
+.addSubtaskBtn:hover {
+  background: var(--color-primary-hover);
+}
+
+.subtaskHint {
+  font-size: 0.72rem;
+  color: var(--color-text-tertiary);
+}
+
 @media (max-width: 480px) {
   .item {
     padding: 0.65rem 0.25rem;

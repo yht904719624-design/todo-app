@@ -23,6 +23,7 @@ export function todoReducer(state: TodoState, action: TodoAction): TodoState {
         dueDate: action.payload.dueDate,
         createdAt: new Date().toISOString(),
         important: false,
+        subtasks: [],
       };
       return {
         ...state,
@@ -140,6 +141,66 @@ export function todoReducer(state: TodoState, action: TodoAction): TodoState {
         ...state,
         todos: state.todos.map((t) =>
           t.id === action.payload.id ? { ...t, important: !t.important } : t,
+        ),
+      };
+
+    case 'ADD_SUBTASK':
+      return {
+        ...state,
+        todos: state.todos.map((t) =>
+          t.id === action.payload.parentId
+            ? {
+                ...t,
+                subtasks: [
+                  ...t.subtasks,
+                  {
+                    id: generateId(),
+                    text: action.payload.text,
+                    completed: false,
+                  },
+                ],
+              }
+            : t,
+        ),
+      };
+
+    case 'TOGGLE_SUBTASK': {
+      const updatedTodos = state.todos.map((t) => {
+        if (t.id !== action.payload.parentId) return t;
+        const subtasks = t.subtasks.map((s) =>
+          s.id === action.payload.subtaskId ? { ...s, completed: !s.completed } : s,
+        );
+        const allCompleted = subtasks.length > 0 && subtasks.every((s) => s.completed);
+        return { ...t, subtasks, completed: allCompleted };
+      });
+      return { ...state, todos: updatedTodos };
+    }
+
+    case 'DELETE_SUBTASK':
+      return {
+        ...state,
+        todos: state.todos.map((t) =>
+          t.id === action.payload.parentId
+            ? {
+                ...t,
+                subtasks: t.subtasks.filter((s) => s.id !== action.payload.subtaskId),
+              }
+            : t,
+        ),
+      };
+
+    case 'EDIT_SUBTASK':
+      return {
+        ...state,
+        todos: state.todos.map((t) =>
+          t.id === action.payload.parentId
+            ? {
+                ...t,
+                subtasks: t.subtasks.map((s) =>
+                  s.id === action.payload.subtaskId ? { ...s, text: action.payload.text } : s,
+                ),
+              }
+            : t,
         ),
       };
 

@@ -6,6 +6,12 @@ export type PriorityFilter = 'all' | Priority;
 
 export type SortBy = 'createdAt' | 'dueDate' | 'priority' | 'custom';
 
+export interface Subtask {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
 export interface Todo {
   id: string;
   text: string;
@@ -14,6 +20,7 @@ export interface Todo {
   dueDate: string | null;
   createdAt: string;
   important: boolean;
+  subtasks: Subtask[];
 }
 
 export interface TodoState {
@@ -45,4 +52,8 @@ export type TodoAction =
   | { type: 'BATCH_COMPLETE'; payload: { ids: string[] } }
   | { type: 'REORDER_TODOS'; payload: { order: string[] } }
   | { type: 'RESTORE_TODO'; payload: { todo: Todo; index: number } }
-  | { type: 'TOGGLE_IMPORTANT'; payload: { id: string } };
+  | { type: 'TOGGLE_IMPORTANT'; payload: { id: string } }
+  | { type: 'ADD_SUBTASK'; payload: { parentId: string; text: string } }
+  | { type: 'TOGGLE_SUBTASK'; payload: { parentId: string; subtaskId: string } }
+  | { type: 'DELETE_SUBTASK'; payload: { parentId: string; subtaskId: string } }
+  | { type: 'EDIT_SUBTASK'; payload: { parentId: string; subtaskId: string; text: string } };
