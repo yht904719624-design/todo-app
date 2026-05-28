@@ -38,6 +38,7 @@ export function TodoForm() {
           onKeyDown={(e) => {
             if (e.ctrlKey && e.key === 'Enter') handleSubmit(e);
           }}
+          aria-label="输入新任务"
         />
         <button className={styles.addBtn} type="submit">
           添加

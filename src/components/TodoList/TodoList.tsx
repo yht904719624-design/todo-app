@@ -48,11 +48,12 @@ export function TodoList() {
 
   return (
     <div className={styles.list}>
-      {visibleTodos.map((todo) => (
+      {visibleTodos.map((todo, index) => (
         <TodoItem
           key={todo.id}
           todo={todo}
           isDragActive={dragId === todo.id}
+          delay={index}
           onDragStart={() => setDragId(todo.id)}
           onDragEnd={() => setDragId(null)}
           onDrop={() => handleDrop(todo.id)}

@@ -13,6 +13,7 @@ export interface Todo {
   priority: Priority;
   dueDate: string | null;
   createdAt: string;
+  important: boolean;
 }
 
 export interface TodoState {
@@ -42,4 +43,6 @@ export type TodoAction =
   | { type: 'DESELECT_ALL' }
   | { type: 'BATCH_DELETE'; payload: { ids: string[] } }
   | { type: 'BATCH_COMPLETE'; payload: { ids: string[] } }
-  | { type: 'REORDER_TODOS'; payload: { order: string[] } };
+  | { type: 'REORDER_TODOS'; payload: { order: string[] } }
+  | { type: 'RESTORE_TODO'; payload: { todo: Todo; index: number } }
+  | { type: 'TOGGLE_IMPORTANT'; payload: { id: string } };

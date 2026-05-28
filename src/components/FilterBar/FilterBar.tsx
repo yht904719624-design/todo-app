@@ -27,7 +27,7 @@ export function FilterBar() {
   const { state, dispatch } = useTodos();
   const [localQuery, setLocalQuery] = useState(state.searchQuery);
   const searchRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const debouncedDispatch = useCallback(
     (value: string) => {

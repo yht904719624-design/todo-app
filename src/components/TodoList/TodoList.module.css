@@ -1,3 +1,3 @@
 .list {
-  /* container only — TodoItem handles its own card styling */
+  background: var(--color-surface);
 }

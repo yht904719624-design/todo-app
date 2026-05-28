@@ -36,6 +36,8 @@ export function sortTodos(todos: Todo[], sortBy: SortBy, order?: string[]): Todo
     return sorted;
   }
   const sorted = [...todos];
+  // Important items first
+  sorted.sort((a, b) => (b.important ? 1 : 0) - (a.important ? 1 : 0));
   switch (sortBy) {
     case 'createdAt':
       return sorted.sort((a, b) => b.createdAt.localeCompare(a.createdAt));

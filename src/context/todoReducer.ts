@@ -22,6 +22,7 @@ export function todoReducer(state: TodoState, action: TodoAction): TodoState {
         priority: action.payload.priority,
         dueDate: action.payload.dueDate,
         createdAt: new Date().toISOString(),
+        important: false,
       };
       return {
         ...state,
@@ -125,6 +126,22 @@ export function todoReducer(state: TodoState, action: TodoAction): TodoState {
 
     case 'REORDER_TODOS':
       return { ...state, order: action.payload.order, sortBy: 'custom' };
+
+    case 'RESTORE_TODO': {
+      const restoredTodos = [...state.todos];
+      restoredTodos.splice(action.payload.index, 0, action.payload.todo);
+      const restoredOrder = [...state.order];
+      restoredOrder.splice(action.payload.index, 0, action.payload.todo.id);
+      return { ...state, todos: restoredTodos, order: restoredOrder };
+    }
+
+    case 'TOGGLE_IMPORTANT':
+      return {
+        ...state,
+        todos: state.todos.map((t) =>
+          t.id === action.payload.id ? { ...t, important: !t.important } : t,
+        ),
+      };
 
     default:
       return state;

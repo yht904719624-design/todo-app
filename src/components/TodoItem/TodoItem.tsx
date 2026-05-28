@@ -8,12 +8,13 @@ import styles from './TodoItem.module.css';
 interface Props {
   todo: Todo;
   isDragActive: boolean;
+  delay: number;
   onDragStart: () => void;
   onDragEnd: () => void;
   onDrop: () => void;
 }
 
-export function TodoItem({ todo, isDragActive, onDragStart, onDragEnd, onDrop }: Props) {
+export function TodoItem({ todo, isDragActive, delay, onDragStart, onDragEnd, onDrop }: Props) {
   const { state, dispatch } = useTodos();
   const isSelected = state.selectedIds.includes(todo.id);
   const [editing, setEditing] = useState(false);
@@ -22,17 +23,14 @@ export function TodoItem({ todo, isDragActive, onDragStart, onDragEnd, onDrop }:
   const [editDueDate, setEditDueDate] = useState(todo.dueDate ?? '');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const completed = todo.completed;
+
   function handleSave() {
     const trimmed = editText.trim();
     if (!trimmed) return;
     dispatch({
       type: 'EDIT_TODO',
-      payload: {
-        id: todo.id,
-        text: trimmed,
-        priority: editPriority,
-        dueDate: editDueDate || null,
-      },
+      payload: { id: todo.id, text: trimmed, priority: editPriority, dueDate: editDueDate || null },
     });
     setEditing(false);
   }
@@ -49,12 +47,12 @@ export function TodoItem({ todo, isDragActive, onDragStart, onDragEnd, onDrop }:
     if (e.key === 'Escape') handleCancel();
   }
 
-  const overdue = isOverdue(todo.dueDate) && !todo.completed;
+  const overdue = isOverdue(todo.dueDate) && !completed;
   const priorityLabel = { high: '高', medium: '中', low: '低' }[todo.priority];
 
   if (editing) {
     return (
-      <div className={styles.item}>
+      <div className={styles.item} role="listitem">
         <div className={styles.editRow}>
           <input
             className={styles.editInput}
@@ -63,6 +61,7 @@ export function TodoItem({ todo, isDragActive, onDragStart, onDragEnd, onDrop }:
             onChange={(e) => setEditText(e.target.value)}
             onKeyDown={handleKeyDown}
             autoFocus
+            aria-label="编辑任务内容"
           />
         </div>
         <div className={styles.editOptions}>
@@ -70,6 +69,7 @@ export function TodoItem({ todo, isDragActive, onDragStart, onDragEnd, onDrop }:
             className={styles.editSelect}
             value={editPriority}
             onChange={(e) => setEditPriority(e.target.value as Priority)}
+            aria-label="优先级"
           >
             <option value="high">高优先级</option>
             <option value="medium">中优先级</option>
@@ -80,14 +80,11 @@ export function TodoItem({ todo, isDragActive, onDragStart, onDragEnd, onDrop }:
             type="date"
             value={editDueDate}
             onChange={(e) => setEditDueDate(e.target.value)}
+            aria-label="截止日期"
           />
           <div className={styles.editActions}>
-            <button className={styles.saveBtn} onClick={handleSave}>
-              保存
-            </button>
-            <button className={styles.cancelBtn} onClick={handleCancel}>
-              取消
-            </button>
+            <button className={styles.saveBtn} onClick={handleSave}>保存</button>
+            <button className={styles.cancelBtn} onClick={handleCancel}>取消</button>
           </div>
         </div>
         {showDeleteConfirm && (
@@ -106,7 +103,8 @@ export function TodoItem({ todo, isDragActive, onDragStart, onDragEnd, onDrop }:
 
   return (
     <div
-      className={`${styles.item} ${todo.completed ? styles.completed : ''} ${isSelected ? styles.selected : ''} ${isDragActive ? styles.dragging : ''}`}
+      className={`${styles.item} todo-item-enter ${completed ? styles.completed : ''} ${isSelected ? styles.selected : ''} ${isDragActive ? styles.dragging : ''}`}
+      style={{ animationDelay: `${delay * 0.04}s` }}
       draggable
       onDragStart={(e) => {
         e.dataTransfer.effectAllowed = 'move';
@@ -121,30 +119,48 @@ export function TodoItem({ todo, isDragActive, onDragStart, onDragEnd, onDrop }:
         e.preventDefault();
         onDrop();
       }}
+      role="listitem"
+      aria-label={`${todo.text}${completed ? ' (已完成)' : ''}`}
     >
+      {/* Selection checkbox */}
       <input
         type="checkbox"
         checked={isSelected}
         onChange={() => dispatch({ type: 'TOGGLE_SELECT', payload: { id: todo.id } })}
         className={styles.selectCheckbox}
-        title="选择此任务"
+        aria-label="选择此任务"
+        tabIndex={-1}
       />
-      <label className={styles.checkboxLabel}>
-        <input
-          type="checkbox"
-          checked={todo.completed}
-          onChange={() => dispatch({ type: 'TOGGLE_TODO', payload: { id: todo.id } })}
-          className={styles.checkbox}
-        />
-        <span className={styles.checkmark} />
-      </label>
 
+      {/* Circular completion checkbox */}
+      <div
+        className={`${styles.checkWrap} ${completed ? styles.checked : ''}`}
+        onClick={() => dispatch({ type: 'TOGGLE_TODO', payload: { id: todo.id } })}
+        role="checkbox"
+        aria-checked={completed}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            dispatch({ type: 'TOGGLE_TODO', payload: { id: todo.id } });
+          }
+        }}
+        aria-label={completed ? '标记为未完成' : '标记为已完成'}
+      >
+        <div className={styles.circle}>
+          <span className={styles.checkIcon}>✓</span>
+        </div>
+      </div>
+
+      {/* Content */}
       <div className={styles.content}>
         <span className={styles.text}>{todo.text}</span>
         <div className={styles.meta}>
-          <span className={`${styles.priorityBadge} ${styles[`priority${todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1)}`]}`}>
-            {priorityLabel}
-          </span>
+          {!completed && (
+            <span className={`${styles.priorityBadge} ${todo.priority === 'high' ? styles.priorityHigh : todo.priority === 'medium' ? styles.priorityMedium : styles.priorityLow}`}>
+              {priorityLabel}
+            </span>
+          )}
           {todo.dueDate && (
             <span className={`${styles.dueDate} ${overdue ? styles.overdue : ''}`}>
               {formatDate(todo.dueDate)}
@@ -154,13 +170,28 @@ export function TodoItem({ todo, isDragActive, onDragStart, onDragEnd, onDrop }:
         </div>
       </div>
 
+      {/* Star / Important */}
+      <button
+        className={`${styles.starBtn} ${todo.important ? styles.starActive : ''}`}
+        onClick={() => dispatch({ type: 'TOGGLE_IMPORTANT', payload: { id: todo.id } })}
+        aria-label={todo.important ? '取消重要' : '标记为重要'}
+      >
+        {todo.important ? '★' : '☆'}
+      </button>
+
+      {/* Actions */}
       <div className={styles.actions}>
-        <button className={styles.editBtn} onClick={() => setEditing(true)}>
+        <button
+          className={styles.editBtn}
+          onClick={() => setEditing(true)}
+          aria-label={`编辑 "${todo.text}"`}
+        >
           编辑
         </button>
         <button
           className={styles.deleteBtn}
           onClick={() => setShowDeleteConfirm(true)}
+          aria-label={`删除 "${todo.text}"`}
         >
           删除
         </button>

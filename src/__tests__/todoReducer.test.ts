@@ -9,6 +9,7 @@ function makeTodo(overrides: Partial<Todo> & { id: string }): Todo {
     priority: 'medium',
     dueDate: null,
     createdAt: '2025-01-01T00:00:00.000Z',
+    important: false,
     ...overrides,
   };
 }
