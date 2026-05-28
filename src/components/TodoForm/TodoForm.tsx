@@ -35,6 +35,9 @@ export function TodoForm() {
           placeholder="添加新任务..."
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.ctrlKey && e.key === 'Enter') handleSubmit(e);
+          }}
         />
         <button className={styles.addBtn} type="submit">
           添加

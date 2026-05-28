@@ -24,7 +24,17 @@ export function isOverdue(dueDate: string | null): boolean {
 
 const priorityOrder: Record<Priority, number> = { high: 0, medium: 1, low: 2 };
 
-export function sortTodos(todos: Todo[], sortBy: SortBy): Todo[] {
+export function sortTodos(todos: Todo[], sortBy: SortBy, order?: string[]): Todo[] {
+  if (sortBy === 'custom' && order) {
+    const indexMap = new Map(order.map((id, i) => [id, i]));
+    const sorted = [...todos];
+    sorted.sort((a, b) => {
+      const ai = indexMap.get(a.id) ?? Infinity;
+      const bi = indexMap.get(b.id) ?? Infinity;
+      return ai - bi;
+    });
+    return sorted;
+  }
   const sorted = [...todos];
   switch (sortBy) {
     case 'createdAt':
@@ -40,6 +50,12 @@ export function sortTodos(todos: Todo[], sortBy: SortBy): Todo[] {
     default:
       return sorted;
   }
+}
+
+export function searchTodos(todos: Todo[], query: string): Todo[] {
+  if (!query.trim()) return todos;
+  const lower = query.toLowerCase();
+  return todos.filter((t) => t.text.toLowerCase().includes(lower));
 }
 
 export function filterTodos(

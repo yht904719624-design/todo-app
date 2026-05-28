@@ -1,7 +1,7 @@
 import { createContext, useEffect, useMemo, useReducer, type ReactNode } from 'react';
 import type { TodoState, TodoAction } from '../types/todo';
 import { todoReducer, initialState } from './todoReducer';
-import { loadTodos, saveTodos } from '../utils/storage';
+import { loadState, saveState } from '../utils/storage';
 
 interface TodoContextValue {
   state: TodoState;
@@ -11,18 +11,17 @@ interface TodoContextValue {
 export const TodoContext = createContext<TodoContextValue | null>(null);
 
 export function TodoProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(todoReducer, initialState);
-
-  useEffect(() => {
-    const saved = loadTodos();
-    if (saved.length > 0) {
-      dispatch({ type: 'LOAD_TODOS', payload: { todos: saved } });
+  const [state, dispatch] = useReducer(todoReducer, initialState, () => {
+    const saved = loadState();
+    if (saved) {
+      return { ...initialState, ...saved };
     }
-  }, []);
+    return initialState;
+  });
 
   useEffect(() => {
-    saveTodos(state.todos);
-  }, [state.todos]);
+    saveState(state);
+  }, [state]);
 
   const value = useMemo(() => ({ state, dispatch }), [state]);
 

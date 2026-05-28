@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect, useCallback } from 'react';
 import type { FilterStatus, PriorityFilter, SortBy } from '../../types/todo';
 import { useTodos } from '../../hooks/useTodos';
 import styles from './FilterBar.module.css';
@@ -19,13 +20,58 @@ const sortOptions: { value: SortBy; label: string }[] = [
   { value: 'createdAt', label: '创建时间' },
   { value: 'dueDate', label: '截止日期' },
   { value: 'priority', label: '优先级' },
+  { value: 'custom', label: '自定义' },
 ];
 
 export function FilterBar() {
   const { state, dispatch } = useTodos();
+  const [localQuery, setLocalQuery] = useState(state.searchQuery);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const debouncedDispatch = useCallback(
+    (value: string) => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        dispatch({ type: 'SET_SEARCH_QUERY', payload: { searchQuery: value } });
+      }, 200);
+    },
+    [dispatch],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.ctrlKey && e.key === 'k') {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  function handleSearchChange(value: string) {
+    setLocalQuery(value);
+    debouncedDispatch(value);
+  }
 
   return (
     <div className={styles.bar}>
+      <input
+        ref={searchRef}
+        className={styles.searchInput}
+        type="text"
+        placeholder="搜索任务... (Ctrl+K)"
+        value={localQuery}
+        onChange={(e) => handleSearchChange(e.target.value)}
+      />
+
       <div className={styles.group}>
         {statusOptions.map((opt) => (
           <button

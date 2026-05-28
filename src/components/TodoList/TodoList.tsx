@@ -1,16 +1,40 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { useTodos } from '../../hooks/useTodos';
-import { filterTodos, sortTodos } from '../../utils/helpers';
+import { searchTodos, filterTodos, sortTodos } from '../../utils/helpers';
 import { TodoItem } from '../TodoItem/TodoItem';
 import { EmptyState } from '../EmptyState/EmptyState';
 import styles from './TodoList.module.css';
 
 export function TodoList() {
-  const { state } = useTodos();
+  const { state, dispatch } = useTodos();
+  const [dragId, setDragId] = useState<string | null>(null);
 
   const visibleTodos = useMemo(
-    () => sortTodos(filterTodos(state.todos, state.filterStatus, state.filterPriority), state.sortBy),
-    [state.todos, state.filterStatus, state.filterPriority, state.sortBy],
+    () =>
+      sortTodos(
+        filterTodos(
+          searchTodos(state.todos, state.searchQuery),
+          state.filterStatus,
+          state.filterPriority,
+        ),
+        state.sortBy,
+        state.order,
+      ),
+    [state.todos, state.filterStatus, state.filterPriority, state.sortBy, state.searchQuery, state.order],
+  );
+
+  const handleDrop = useCallback(
+    (targetId: string) => {
+      if (!dragId || dragId === targetId) return;
+      const order = [...(state.order.length > 0 ? state.order : visibleTodos.map((t) => t.id))];
+      const fromIndex = order.indexOf(dragId);
+      const toIndex = order.indexOf(targetId);
+      if (fromIndex === -1 || toIndex === -1) return;
+      order.splice(fromIndex, 1);
+      order.splice(toIndex, 0, dragId);
+      dispatch({ type: 'REORDER_TODOS', payload: { order } });
+    },
+    [dragId, state.order, visibleTodos, dispatch],
   );
 
   if (visibleTodos.length === 0) {
@@ -25,7 +49,14 @@ export function TodoList() {
   return (
     <div className={styles.list}>
       {visibleTodos.map((todo) => (
-        <TodoItem key={todo.id} todo={todo} />
+        <TodoItem
+          key={todo.id}
+          todo={todo}
+          isDragActive={dragId === todo.id}
+          onDragStart={() => setDragId(todo.id)}
+          onDragEnd={() => setDragId(null)}
+          onDrop={() => handleDrop(todo.id)}
+        />
       ))}
     </div>
   );

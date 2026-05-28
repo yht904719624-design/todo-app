@@ -2,18 +2,25 @@ import { useState } from 'react';
 import type { Todo, Priority } from '../../types/todo';
 import { useTodos } from '../../hooks/useTodos';
 import { formatDate, isOverdue } from '../../utils/helpers';
+import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
 import styles from './TodoItem.module.css';
 
 interface Props {
   todo: Todo;
+  isDragActive: boolean;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+  onDrop: () => void;
 }
 
-export function TodoItem({ todo }: Props) {
-  const { dispatch } = useTodos();
+export function TodoItem({ todo, isDragActive, onDragStart, onDragEnd, onDrop }: Props) {
+  const { state, dispatch } = useTodos();
+  const isSelected = state.selectedIds.includes(todo.id);
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(todo.text);
   const [editPriority, setEditPriority] = useState<Priority>(todo.priority);
   const [editDueDate, setEditDueDate] = useState(todo.dueDate ?? '');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   function handleSave() {
     const trimmed = editText.trim();
@@ -83,12 +90,45 @@ export function TodoItem({ todo }: Props) {
             </button>
           </div>
         </div>
+        {showDeleteConfirm && (
+          <ConfirmDialog
+            message="确定要删除这条任务吗？"
+            onConfirm={() => {
+              dispatch({ type: 'DELETE_TODO', payload: { id: todo.id } });
+              setShowDeleteConfirm(false);
+            }}
+            onCancel={() => setShowDeleteConfirm(false)}
+          />
+        )}
       </div>
     );
   }
 
   return (
-    <div className={`${styles.item} ${todo.completed ? styles.completed : ''}`}>
+    <div
+      className={`${styles.item} ${todo.completed ? styles.completed : ''} ${isSelected ? styles.selected : ''} ${isDragActive ? styles.dragging : ''}`}
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = 'move';
+        onDragStart();
+      }}
+      onDragEnd={onDragEnd}
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        onDrop();
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={isSelected}
+        onChange={() => dispatch({ type: 'TOGGLE_SELECT', payload: { id: todo.id } })}
+        className={styles.selectCheckbox}
+        title="选择此任务"
+      />
       <label className={styles.checkboxLabel}>
         <input
           type="checkbox"
@@ -120,11 +160,22 @@ export function TodoItem({ todo }: Props) {
         </button>
         <button
           className={styles.deleteBtn}
-          onClick={() => dispatch({ type: 'DELETE_TODO', payload: { id: todo.id } })}
+          onClick={() => setShowDeleteConfirm(true)}
         >
           删除
         </button>
       </div>
+
+      {showDeleteConfirm && (
+        <ConfirmDialog
+          message="确定要删除这条任务吗？"
+          onConfirm={() => {
+            dispatch({ type: 'DELETE_TODO', payload: { id: todo.id } });
+            setShowDeleteConfirm(false);
+          }}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
     </div>
   );
 }

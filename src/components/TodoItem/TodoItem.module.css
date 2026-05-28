@@ -17,6 +17,32 @@
   opacity: 0.55;
 }
 
+.selected {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.selectCheckbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.dragging {
+  opacity: 0.4;
+}
+
+.item {
+  cursor: grab;
+}
+
+.item:active {
+  cursor: grabbing;
+}
+
 .completed .text {
   text-decoration: line-through;
 }
